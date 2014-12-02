@@ -23,7 +23,8 @@ public class MainScene extends JPanel implements Runnable{
 
 	private Thread mainSceneThread;
 
-	public MainScene(int intputWidth, int inputHeight, CustomMouse inputMouseListener, MainManagment inputRootFrame) {
+	public MainScene(int intputWidth, int inputHeight, CustomMouse inputMouseListener, MainManagment inputRootFrame)
+	{
 		//super();
 		setWidth  = intputWidth;
 		setHeight = inputHeight;
@@ -45,7 +46,8 @@ public class MainScene extends JPanel implements Runnable{
 		}
 	}
 
-	public void run() {
+	public void run()
+	{
 		try{
 			while(!mainSceneThread.currentThread().isInterrupted()){
 				
@@ -90,7 +92,8 @@ public class MainScene extends JPanel implements Runnable{
 		repaint();
 	}
 
-	public void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g)
+	{
 		Image image1;
 		image1 = new ImageIcon("resource/background.png").getImage();
 

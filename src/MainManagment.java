@@ -53,7 +53,7 @@ public class MainManagment extends JFrame {
 	{
 		clearFrame();
 				
-		gameScene = new GameScene(mouseEventListener, rootFrame, targetScore);
+		gameScene = new GameScene(mouseEventListener, rootFrame, targetScore, 60);
 		setSize(1280, 720);
 		addKeyListener(gameScene);
 		add(gameScene);

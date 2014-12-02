@@ -62,7 +62,7 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 	public void paintComponent(Graphics g)
 	{	
 		Graphics g2=(Graphics )g;
-		g2.drawImage(back.getImage(),0,0,this.getWidth(),this.getHeight(),null);
+		g2.drawImage(back.getImage(), 0, 0, this.getWidth(), this.getHeight(), null);
 		
 		before=img4.getImage();
 		after=before.getScaledInstance(200, 150, java.awt.Image.SCALE_SMOOTH);

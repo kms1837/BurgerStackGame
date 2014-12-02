@@ -8,48 +8,59 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 
 public class GameScene extends JPanel implements KeyListener,Runnable
 {
-	//UI관련 변수들
-	private static final int maxUserBurgerNumber 		= 14;	//유저가 만들수있는 최대 버거의층
-	private static final int userBurgerBottomSide 		= 460; 	//유저가 만든 버거의 아래쪽 여백
+	//UI관련 상수
+	private static final int maxUserBurgerNumber 		= 11;	//유저가 만들수있는 최대 버거의층
+	
+	private static final int userBurgerBottomSide 		= 320; 	//유저가 만든 버거의 아래쪽 여백
 	private static final int userBurgerWidth			= 400;	//유저가 만든 버거의 재료 넓이
-	private static final int userBurgerHeight			= 30;	//유저가 만든 버거의 재료 높이
+	private static final int userBurgerHeight		 	= 30;	//유저가 만든 버거의 재료 높이
+	
 	private static final int exampleBurgerBottomSide 	= 160; 	//샘플 버거의 아래쪽 여백
 	private static final int exampleBurgerWidth			= 200;	//샘플 버거의 재료 넓이
 	private static final int exampleBurgerHeight		= 10;	//샘플 버거의 재료 높이
 	
-	private static final int burgerManuLeftSide		= 130; //햄버거 메뉴 왼쪽여백
+	private static final int burgerManuLeftSide		= 180; //햄버거 메뉴 왼쪽여백
 	private static final int burgerMenuTopSide 		= 540; //햄버거 메뉴 위쪽여백
-	private static final int burgerMenuItemGap 		= 170; //햄버거 메뉴 아이템 여백
-	private static final int burgerMenuItemWidth	= 150; //햄버거 메뉴 아이템 넓이
-	private static final int burgerMenuItemHeight	= 150; //햄버거 메뉴 아이템 높이
+	private static final int burgerMenuItemGap 		= 130; //햄버거 메뉴 아이템 여백
+	private static final int burgerMenuItemWidth	= 120; //햄버거 메뉴 아이템 넓이
+	private static final int burgerMenuItemHeight	= 120; //햄버거 메뉴 아이템 높이
 	
+	private static final int timerGaugeLeftSide = 280; //타이머 게이지 왼쪽여백
+	private static final int timerGaugeTopSide 	= 30;  //타이머 게이지 위쪽여백
+	private static final int timerGaugeWidth 	= 600; //타이머 게이지 넓이
+	private static final int timerGaugeHeight 	= 30;  //타이머 게이지 높이
+	
+	//로직 변수
 	private int selectedBurgerMenuNumber; //선택한 버거 메뉴
 	private int maxBurgerMenuNumber;	  //현재 버거 재료 종류(최소 2)
-	
 	
 	private int score; 		 //현재점수
 	private int targetScore; //게임 목표점수
 	
-	//로직관련 변수들
+	private int gameTimer; //타이머
+	private int setTimer;  //설정된 시간
 	
 	/*
-	 토핑데이터 값 목록
+	 토핑데이터 목록
 	 
 	 1 - 아래 빵
 	 2 - 위 빵
 	 3 - 고기패티
-	 4 - 양상추
-	 5 - 토마토
-	 6 - 치즈
+	 4 - 치즈
+	 5 - 양상추
+	 6 - 토마토
 	 
-	 */
+	*/
 	
-	private Color burgerColor[] = {Color.WHITE, Color.ORANGE, Color.YELLOW, Color.DARK_GRAY, Color.GREEN, Color.RED, Color.BLUE, Color.CYAN};
+	private Color burgerColor[] = {Color.WHITE, Color.pink, Color.orange, Color.DARK_GRAY, Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, Color.CYAN};
+	private String burgerMenuItemImagePath[] = {"", "resource/menuItem/item1.png", "resource/menuItem/item2.png", "resource/menuItem/item3.png", "resource/menuItem/item4.png", "resource/menuItem/item5.png", "resource/menuItem/item6.png", "resource/menuItem/item7.png"};
+	private String burgerLngredientName[] =   {"", "burgerbread_top", "burgerbread_bottom", "burgermeat", "burgercheese", "burgerlattuga", "burgertomato"};
 	
 	private burgerIngredient userBurger[];
 	private int userBurgerCount;
@@ -64,16 +75,20 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	
 	
 	/*method*/
-	public GameScene(CustomMouse inputMouseListener, MainManagment inputRootFrame, int inputTargetScore)
+	
+	public GameScene(CustomMouse inputMouseListener, MainManagment inputRootFrame, int inputTargetScore, int inputTimer)
 	{
 		mouse 	  = inputMouseListener;
 		rootFrame = inputRootFrame;
+		
+		gameTimer = inputTimer * 60;
+		setTimer  = inputTimer * 60;
 
 		gameThread = new Thread(this);
 		gameThread.start();
 		
 		selectedBurgerMenuNumber = 1;
-		maxBurgerMenuNumber 	 = 6;
+		maxBurgerMenuNumber 	 = 7;
 		
 		userBurger = new burgerIngredient[maxUserBurgerNumber];
 		userBurgerCount = 0;
@@ -101,8 +116,13 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	{
 		try{
 			while(!gameThread.currentThread().isInterrupted()){
-				mouseBurgerMenuEvent();				
-				gameThread.sleep(0);
+				gameTimer--;
+				mouseBurgerMenuEvent();
+				repaint();
+				revalidate();
+				//1초에 한번 - 1000
+				//1초에 60번 - 17
+				gameThread.sleep(17);
 			}
 		}catch(InterruptedException ex){
 			
@@ -143,8 +163,8 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 				break;
 			}
 		}
-		revalidate();
-		repaint();
+		//revalidate();
+		//repaint();
 	}//method keyPressed - 버거메뉴에 대한 키이벤트 처리
 	
 	private void mouseBurgerMenuEvent()
@@ -162,8 +182,8 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 			   positionY < burgerMenuTopSide+burgerMenuItemHeight)
 			{
 			   selectedBurgerMenuNumber = i;
-			   revalidate();
-			   repaint();
+			   //revalidate();
+			   //repaint();
 			}
 			
 			if(clickPositionX > burgerManuLeftSide + ((i-1)*burgerMenuItemGap) &&
@@ -196,8 +216,8 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 		
 		exampleBurger = new int[maxExampleBurgerNumber];
 		
-		exampleBurger[0] = 1;
-		exampleBurger[maxExampleBurgerNumber-1] = 2;
+		exampleBurger[0] = 2;
+		exampleBurger[maxExampleBurgerNumber-1] = 1;
 		for(int i=1; i<=maxExampleBurgerNumber-2; i++){
 			exampleBurger[i] = 2 + random.nextInt(maxBurgerMenuNumber-2);
 			//메뉴의 마지막은 제출메뉴가 되기때문에 -1을 해줌
@@ -225,7 +245,7 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	{
 		boolean solutionCheck = true;
 		
-		if(userBurgerCount != maxExampleBurgerNumber || userBurger[0].ingredientNumber != 1 || userBurger[maxExampleBurgerNumber-1].ingredientNumber != 2){
+		if(userBurgerCount != maxExampleBurgerNumber || userBurger[0].ingredientNumber != 2 || userBurger[maxExampleBurgerNumber-1].ingredientNumber != 1){
 			System.out.println("실패");
 			rootFrame.playEffectSound("resource/sound/not_correct.mp3");
 		}else{
@@ -294,22 +314,21 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 				int ingredientPositionY = userBurger[i].ingredientPositionY;
 				int targetPositionY = userBurgerBottomSide - (i*userBurgerHeight); //최종위치
 				
-				g.setColor(burgerColor[ingredientNumber]);
-				
 				ingredientPositionY = ingredientPositionY + 10;
 				
 				if(ingredientPositionY + 10 > targetPositionY){
 					ingredientPositionY = targetPositionY;
 				}else{
-					repaint();
-					revalidate();
-				}
+//					repaint();
+//					revalidate();
+				}//버거 애니메이션
 				
 				userBurger[i].ingredientPositionY = ingredientPositionY;
-				
-				//userBurgerBottomSide - (i*userBurgerHeight)
-				
-				g.fillRect(userBurgerPositionX, ingredientPositionY, userBurgerWidth, userBurgerHeight);
+			
+				//g.setColor(burgerColor[ingredientNumber]);
+				ImageIcon burgerLngredientImage = new ImageIcon("resource/" + burgerLngredientName[ingredientNumber] + ".png");
+				g.drawImage(burgerLngredientImage.getImage(), userBurgerPositionX, ingredientPositionY,this);
+				//g.fillRect(userBurgerPositionX, ingredientPositionY, userBurgerWidth, userBurgerHeight);
 				
 			}
 		}
@@ -326,22 +345,43 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 				if(i==maxBurgerMenuNumber)	g.setColor(Color.WHITE); //제출메뉴
 				else						g.setColor(burgerColor[selectedBurgerMenuNumber]);
 				
+				//ImageIcon menuItemImage = new ImageIcon(burgerMenuItemImagePath[i] + ".png");
+				//g.drawImage(menuItemImage.getImage(), burgerManuLeftSide + ((i-1)*burgerMenuItemGap), burgerMenuTopSide,this);
 				g.fillRect(burgerManuLeftSide + ((i-1)*burgerMenuItemGap), burgerMenuTopSide, burgerMenuItemWidth, burgerMenuItemHeight);
 			}
+			
+			ImageIcon menuItemImage = new ImageIcon(burgerMenuItemImagePath[i]); 
+			//g.drawImage(menuItemImage.getImage(), this.getWidth()/2, burgerMenuTopSide, this);
+			g.drawImage(menuItemImage.getImage(), burgerManuLeftSide + ((i-1)*burgerMenuItemGap), burgerMenuTopSide, this);
+			
 		}
 	}//method displayMenu - 아래의 햄버거 메뉴를 출력해준다.
 	
 	private void displayUI(Graphics g)
 	{
 		Font font1 = new Font("Eras Bold ITC", Font.PLAIN, 30);
-		Font font2=new Font("Eras Bold ITC",Font.PLAIN,45);
-		Font font3=new Font("자연Block",Font.BOLD,80);
+		//Font font2=new Font("Eras Bold ITC",Font.PLAIN,45);
+		//Font font3=new Font("자연Block",Font.BOLD,80);
 		g.setFont(font1);
 		g.setColor(Color.black);
 		g.drawString("목표 : ", this.getWidth() - 200 , 50);//string for price of items
 		g.drawString(""+targetScore, this.getWidth() - 80 , 50);
 		g.drawString("만든햄버거 갯수 : ", this.getWidth() - 340 , 100);
 		g.drawString(""+score, this.getWidth() - 80 , 100);
+		
+		int sec  = gameTimer % 60;
+	    int min  = gameTimer / 60 % 60;
+	    
+		g.drawString("남은시간 " + min + " : " + sec , this.getWidth()/2 - 360 , 100);//string for price of items
+		
+		float test = ((float)gameTimer/setTimer) * 100;
+		
+		g.setColor(Color.red);
+		g.fillRect(timerGaugeLeftSide, timerGaugeTopSide, (timerGaugeWidth*(int)test)/100, timerGaugeHeight);
+		g.setColor(Color.black);
+		g.drawRect(timerGaugeLeftSide, timerGaugeTopSide, timerGaugeWidth, timerGaugeHeight);
+		
+	    
 	}
 	
 	public void update(Graphics g)
