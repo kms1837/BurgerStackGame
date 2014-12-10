@@ -16,11 +16,11 @@ import javazoom.jl.player.*;
 public class MainManagment extends JFrame {
 	
 	private MainManagment rootFrame;
-	MainScene mainScene; 
-	GameScene gameScene;
-	ClothingScene clothingScene;
+	private MainScene mainScene; 
+	private GameScene gameScene;
+	private ClothingScene clothingScene;
+	private ResultScene resultScene;
 	
-	//Player backgroundSound;
 	SoundPlayer backgroundSound;
 	
 	private CustomMouse mouseEventListener;
@@ -28,23 +28,22 @@ public class MainManagment extends JFrame {
 	public void clearFrame()
 	{
 		
-		if(mainScene!=null) {
-			mainScene.clearExitScene();
+		if(mainScene != null) {
 			remove(mainScene);
 		}
 		
-		if(gameScene!=null) {
-			gameScene.clearExitScene();
+		if(gameScene != null) {
 			removeKeyListener(gameScene);
 			remove(gameScene);
 		}
 		
-		if(clothingScene!=null) {
-			clothingScene.clearExitScene();
+		if(clothingScene != null) {
 			remove(clothingScene);
 		}
 		
-		mainScene = null;
+		if(resultScene != null) {
+			remove(resultScene);
+		}
 		
 		repaint();
 	}
@@ -52,7 +51,7 @@ public class MainManagment extends JFrame {
 	public void moveGameScene(int targetScore)
 	{
 		clearFrame();
-				
+		
 		gameScene = new GameScene(mouseEventListener, rootFrame, targetScore, 60);
 		setSize(1280, 720);
 		addKeyListener(gameScene);
@@ -60,6 +59,8 @@ public class MainManagment extends JFrame {
 		
 		playBackgroundSound("resource/sound/main_back.mp3");
 
+		System.out.println("∞‘¿”æ¿ ¿Ãµø");
+		
 		revalidate();
 	}
 	
@@ -73,6 +74,8 @@ public class MainManagment extends JFrame {
 		
 		playBackgroundSound("resource/sound/main_back.mp3");
 		
+		System.out.println("∏ﬁ¿Œæ¿ ¿Ãµø");
+		
 		revalidate();
 	}
 	
@@ -85,6 +88,24 @@ public class MainManagment extends JFrame {
 		add(clothingScene);
 		
 		playBackgroundSound("resource/sound/clothing_back.mp3");
+		
+		System.out.println("ø æ¿ ¿Ãµø");
+
+		revalidate();
+	}
+	
+	public void moveResultScene(boolean inputResult, int inputBurgerCount, int inputTimer)
+	{
+		clearFrame();
+	
+		resultScene = new ResultScene(inputResult, inputBurgerCount, inputTimer);
+		setSize(1280, 720);
+		//addKeyListener(gameScene);
+		add(resultScene);
+		
+		if(inputResult) playBackgroundSound("resource/sound/mission_complete.mp3");
+		else			playBackgroundSound("resource/sound/mission_fail.mp3");
+		
 
 		revalidate();
 	}
@@ -117,8 +138,7 @@ public class MainManagment extends JFrame {
 		rootFrame = this;
 		backgroundSound = null;
 		
-		setTitle("«‹πˆ∞≈ ∞‘¿” ^_^");
-		setLayout(new GridLayout(1,2));//dualmode∏¶ ¿ß«— layout
+		setTitle("BURGERMON");
 		setSize(640, 800);
 		setResizable(false);
 		setVisible(true);

@@ -22,26 +22,35 @@ public class MainScene extends JPanel implements Runnable{
 	private Image endImg;
 
 	private Thread mainSceneThread;
+	private boolean flag;
+	// 본래는 interrupt를 이용하려 했으나 INTERRUPTED while loading Image가 나온거 보니 이미지로딩 쓰레드와 충돌이나는 문제를 해결못하여 사용
 
+	Image image1;
+	Image logo;
+	
 	public MainScene(int intputWidth, int inputHeight, CustomMouse inputMouseListener, MainManagment inputRootFrame)
 	{
 		//super();
+		
+		
+		image1 = new ImageIcon("resource/background.png").getImage();
+		logo = new ImageIcon("resource/logo.png").getImage();
+		
 		setWidth  = intputWidth;
 		setHeight = inputHeight;
 		mouse 	  = inputMouseListener;
 		rootFrame = inputRootFrame;
-
+		flag = false;
+		
 		mainSceneThread = new Thread(this);
 		mainSceneThread.start();
-		
-		this.setLayout(new GridBagLayout());
 	}
 
 	public void clearExitScene()
 	{
 		if(mainSceneThread != null) {
+			flag = true;
 			mainSceneThread.interrupt();
-			mainSceneThread = null;
 			System.gc();
 		}
 	}
@@ -49,15 +58,17 @@ public class MainScene extends JPanel implements Runnable{
 	public void run()
 	{
 		try{
-			while(!mainSceneThread.currentThread().isInterrupted()){
-				
+			while(!flag){
 				buttonEvent();
 				
-				mainSceneThread.sleep(30);
+				repaint();
+				revalidate();
 				
+				mainSceneThread.sleep(17);
 			}
-		}catch(InterruptedException ex){
-			
+		}catch(InterruptedException ex){	
+		} finally {
+			System.out.println("mainScene Thread dead");
 		}
 	}
 	
@@ -78,28 +89,21 @@ public class MainScene extends JPanel implements Runnable{
 		if(mouse.getMouseClickPositionX()>353 && mouse.getMouseClickPositionX()<927 && mouse.getMouseClickPositionY()>455 && mouse.getMouseClickPositionY()<718)
 		{
 			System.out.println("클릭");
-			mouse.mouseUp();
+			clearExitScene();
 			rootFrame.moveClothingScene();
-			//rootFrame.moveGameScene();
-			//sound.myBgmEnd();
 		}
 		else if(mouse.getMouseClickPositionX()>1170 && mouse.getMouseClickPositionX()<1250 && mouse.getMouseClickPositionY()>30 && mouse.getMouseClickPositionY()<110)
 		{
 			System.exit(0);
-			//sound.myBgmEnd();
 		}
-		
-		repaint();
 	}
 
 	public void paintComponent(Graphics g)
 	{
-		Image image1;
-		image1 = new ImageIcon("resource/background.png").getImage();
 
 		Graphics2D g2 = (Graphics2D) g;
 		g2.drawImage(image1, 0, 0, getWidth(), getHeight(), this);
-		
+		g2.drawImage(logo, 400, 70, 430, 380, this);
 		g2.drawImage(startButtonImg, 330, 455, this);
 		g2.drawImage(endImg, 1100, 30, this);
 	}

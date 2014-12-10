@@ -36,6 +36,8 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	private static final int timerGaugeWidth 	= 600; //타이머 게이지 넓이
 	private static final int timerGaugeHeight 	= 30;  //타이머 게이지 높이
 	
+	private ImageIcon background;
+	
 	//로직 변수
 	private int selectedBurgerMenuNumber; //선택한 버거 메뉴
 	private int maxBurgerMenuNumber;	  //현재 버거 재료 종류(최소 2)
@@ -73,11 +75,14 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	
 	private Thread gameThread;
 	
-	
+	private boolean flag;
+
 	/*method*/
-	
 	public GameScene(CustomMouse inputMouseListener, MainManagment inputRootFrame, int inputTargetScore, int inputTimer)
 	{
+		
+		background = new ImageIcon("resource/background3.png");
+		
 		mouse 	  = inputMouseListener;
 		rootFrame = inputRootFrame;
 		
@@ -86,6 +91,7 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 
 		gameThread = new Thread(this);
 		gameThread.start();
+		//다른 스레드간 접근과 애매모호해지는걸 방지해 클래스내에서 스레드를 관리하는것이 좋음
 		
 		selectedBurgerMenuNumber = 1;
 		maxBurgerMenuNumber 	 = 7;
@@ -95,6 +101,8 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 		
 		score = 0;
 		
+		flag = false;
+		
 		targetScore = inputTargetScore;
 		
 		createExampleBurger();
@@ -102,31 +110,45 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 		this.setLayout(new GridBagLayout());
 	}//construct
 	
+	//private int bug = 0 ;
+	//TO-DO 스레드 중지안되는 오류 수정
+	
 	public void clearExitScene()
 	{
 		if(gameThread!=null) {
-			gameThread.interrupt();
-			gameThread = null;
-			System.gc();
+//			gameThread.interrupt(); 
+//			System.gc();
+			flag = true;
 		}
 	}//method clearExitScene - 현재 씬을 말끔히 지워준다.
 	
 	@Override
 	public void run() 
-	{
+	{	
 		try{
-			while(!gameThread.currentThread().isInterrupted()){
+			while(!flag){
 				gameTimer--;
+				
 				mouseBurgerMenuEvent();
+				
 				repaint();
 				revalidate();
 				//1초에 한번 - 1000
-				//1초에 60번 - 17
+				//1초에 60번 - 17		
+				
+				if(gameTimer<=0) {
+					clearExitScene();
+					rootFrame.moveResultScene(false, score, gameTimer);
+				}
+				
 				gameThread.sleep(17);
 			}
 		}catch(InterruptedException ex){
 			
+		} finally {
+			System.out.println("gameScene Thread dead");
 		}
+		
 	}//thread
 
 	@Override
@@ -162,6 +184,9 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 			case KeyEvent.VK_DOWN : {
 				break;
 			}
+			case KeyEvent.VK_ENTER : {
+				clearExitScene();
+			}
 		}
 		//revalidate();
 		//repaint();
@@ -174,7 +199,7 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 		int positionX = mouse.getMousePositionX();
 		int positionY = mouse.getMousePositionY();
 		
-		for(int i=1; i<=5; i++){
+		for(int i=1; i<=maxBurgerMenuNumber; i++){
 			// && positionY
 			if(positionX > burgerManuLeftSide + ((i-1)*burgerMenuItemGap) &&
 			   positionX < burgerManuLeftSide + ((i-1)*burgerMenuItemGap)+burgerMenuItemWidth &&
@@ -267,6 +292,11 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 			//검사
 		}
 		
+		if(score >= targetScore) {
+			clearExitScene();
+			rootFrame.moveResultScene(true, score, gameTimer);
+		}
+		
 		userBurgerCount = 0;
 		
 		createExampleBurger();
@@ -276,25 +306,31 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	private void displayExampleBurger(Graphics g)
 	{
 		int exampleBurgerPositionX;
+		
 		exampleBurgerPositionX = (this.getWidth()/10) - (exampleBurgerWidth/2);
 		
 		g.setColor(Color.BLACK);
 		
 		g.drawRect(	exampleBurgerPositionX-20,
 					10,
-					exampleBurgerWidth + 40,
-					170);
+					exampleBurgerWidth + 60,
+					260);
 		
 		if(maxExampleBurgerNumber > 0) {
 			for(int i=0; i<maxExampleBurgerNumber; i++){
 				//System.out.println("i층 버거 내용물 : " + exampleBurger[i]);
-				int tempColor = exampleBurger[i]; 
-				g.setColor(burgerColor[tempColor]);
-
+				//int tempColor = exampleBurger[i]; 
+				//g.setColor(burgerColor[tempColor]);
+				
+				ImageIcon burgerLngredientImage = new ImageIcon("resource/exampleburger/" + burgerLngredientName[exampleBurger[i]] + ".png");
+				g.drawImage(burgerLngredientImage.getImage(), exampleBurgerPositionX, exampleBurgerBottomSide - (i*exampleBurgerHeight),this);
+				
+				/*
 				g.fillRect(	exampleBurgerPositionX,
 							exampleBurgerBottomSide - (i*exampleBurgerHeight),
 							exampleBurgerWidth,
 							exampleBurgerHeight);
+				*/
 				
 			}
 		}
@@ -359,16 +395,14 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 	
 	private void displayUI(Graphics g)
 	{
-		Font font1 = new Font("Eras Bold ITC", Font.PLAIN, 30);
-		//Font font2=new Font("Eras Bold ITC",Font.PLAIN,45);
-		//Font font3=new Font("자연Block",Font.BOLD,80);
+		Font font1 = new Font("맑은 고딕", Font.PLAIN, 30);
+		
 		g.setFont(font1);
 		g.setColor(Color.black);
 		g.drawString("목표 : ", this.getWidth() - 200 , 50);//string for price of items
 		g.drawString(""+targetScore, this.getWidth() - 80 , 50);
 		g.drawString("만든햄버거 갯수 : ", this.getWidth() - 340 , 100);
 		g.drawString(""+score, this.getWidth() - 80 , 100);
-		
 		int sec  = gameTimer % 60;
 	    int min  = gameTimer / 60 % 60;
 	    
@@ -380,12 +414,16 @@ public class GameScene extends JPanel implements KeyListener,Runnable
 		g.fillRect(timerGaugeLeftSide, timerGaugeTopSide, (timerGaugeWidth*(int)test)/100, timerGaugeHeight);
 		g.setColor(Color.black);
 		g.drawRect(timerGaugeLeftSide, timerGaugeTopSide, timerGaugeWidth, timerGaugeHeight);
-		
-	    
+	}
+	
+	private void displayBackUI(Graphics g)
+	{
+		g.drawImage(background.getImage(), 0, 0, this.getWidth(), this.getHeight(), this);
 	}
 	
 	public void update(Graphics g)
 	{
+		displayBackUI(g);
 		displayExampleBurger(g);
 		displayUserBurger(g);
 		displayMenu(g);

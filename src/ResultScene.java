@@ -1,22 +1,29 @@
 import javax.swing.*;
+
 import java.awt.event.*;
 import java.awt.*;
 
 
-public class ResultScene extends JFrame {
+public class ResultScene extends JPanel {
 	Container contentPane;
-	ResultScene(){
-		setTitle("BURGERMON");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		creatMenu();
-		contentPane = getContentPane();
-		MyPanel panel = new MyPanel(); 
-		contentPane.add(panel,BorderLayout.CENTER);
-		setSize(300, 400);
-		setVisible(true);
+	//ImageIcon retry = new ImageIcon("resource/retry.png");
+	ImageIcon successIcon 	= new ImageIcon("resource/success.png");
+	ImageIcon failIcon 		= new ImageIcon("resource/failback.png"); //배경화면 로딩
+	private boolean result;
+	//JButton btn 	= new JButton("resource/retry.png");
+	
+	private int resultTimer;
+	private int resultBurgerCount;
+	
+	ResultScene(boolean inputResult, int inputBurgerCount, int inputTimer){
+		//this.setLayout(new GridBagLayout());
+		result = inputResult;
+		resultTimer = inputTimer;
+		resultBurgerCount = inputBurgerCount;
 	}
 	
-	void creatMenu(){
+	/*
+	void creatMenu() {
 		JMenuBar mb = new JMenuBar();
 		JMenuItem [] menuItem = new JMenuItem[2];
 		String [] itemTitle = {"Retry", "Exit"};
@@ -31,28 +38,30 @@ public class ResultScene extends JFrame {
 		mb.add(fileMenu);
 		setJMenuBar(mb);
 	}
-
-
-
-class MyPanel extends JPanel {
-	ImageIcon icon = new ImageIcon("images/failback.png");//배경화면 로딩
-	
-	Image img = icon.getImage();//이미지 객체
+	*/
 	
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
+		Font font1 = new Font("맑은 고딕", Font.PLAIN, 30);
 		
-		g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
-	
+		if(result) {
+			
+			g.drawImage(successIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
+			
+			g.setFont(font1);
+			g.setColor(Color.red);
+			
+			int sec  = resultTimer % 60;
+		    int min  = resultTimer / 60 % 60;
+		    
+			g.drawString(min + " : " + sec  + " 시간 남기고 성공", this.getWidth()/2 - 160 , 300);//string for price of items
+			
+		}else{
+			g.setFont(font1);
+			g.setColor(Color.red);
+			
+			g.drawImage(failIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
+			g.drawString( resultBurgerCount + " 개 만듬", this.getWidth()/2 - 260 , 100);
+		}
 	}
-	ImageIcon retry = new ImageIcon("images/retry.png");
-	
-	JButton btn = new JButton("images/retry.png");
-	
-
-}
-//public static void main(String [] args){
-	//new ResultScene();
-	
-//	}
 }

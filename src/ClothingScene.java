@@ -6,13 +6,14 @@ import java.awt.Font;
 
 import javax.swing.*;
 
-public class ClothingScene extends JPanel implements MouseListener,MouseMotionListener{
+public class ClothingScene extends JPanel implements Runnable{
 
 	private static final long serialVersionUID = 1L;
 	
 	int price;//the price of items
 	int total=0;//the total numbers of hamburger
 	int cnt_top=0;int cnt_bot=0;int cnt_shoe=0;
+	
 	ImageIcon back=new ImageIcon("resource/background2.png");
 	ImageIcon img1=new ImageIcon("resource/logo-shoe.png");
 	ImageIcon img2=new ImageIcon("resource/heels.png");
@@ -44,24 +45,27 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 	
 	private CustomMouse mouse;
 	private MainManagment rootFrame;
+	private Thread mouseEventThread;
 	
 	public ClothingScene(CustomMouse inputMouseListener, MainManagment inputRootFrame)
 	{
-		//mouse = inputMouseListener;
+		mouse = inputMouseListener;
 		rootFrame = inputRootFrame;
-		addMouseListener(this);
-		addMouseMotionListener(this);
-		
+		mouseEventThread = new Thread(this);
+		mouseEventThread.start();
 	}
 	
 	public void clearExitScene()
 	{
-		
+		System.out.println("¿Ê¾À ÀÌº¥Æ® Á¦°Å");
+		if(mouseEventThread!=null) {
+			mouseEventThread.interrupt();
+		}
 	}
 	
 	public void paintComponent(Graphics g)
 	{	
-		Graphics g2=(Graphics )g;
+		Graphics g2=(Graphics)g;
 		g2.drawImage(back.getImage(), 0, 0, this.getWidth(), this.getHeight(), null);
 		
 		before=img4.getImage();
@@ -130,16 +134,10 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 		
 		 
 	}
-	@Override
-	public void mouseClicked(MouseEvent e) {
 
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		int xx=e.getX();
-		int yy=e.getY();
+	public void mouseClickEvent() {
+		int xx = mouse.getMouseClickPositionX();
+		int yy = mouse.getMouseClickPositionY();
 				
 		boolean topflag=false;
 		boolean bottomflag=false;
@@ -267,6 +265,7 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 		}
 		
 		if(start){
+			clearExitScene();
 			rootFrame.moveGameScene(total);
 		}
 		
@@ -274,33 +273,11 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 		repaint();
 	}
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
+	public void mouseMoveEvent() {
 		// TODO Auto-generated method stub
+		int xx = mouse.getMousePositionX();
+		int yy = mouse.getMousePositionY();
 		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		int xx=e.getX();
-		int yy=e.getY();
 		boolean top1=((xx>=row1-100&&xx<=row1+100)&&(yy>=col1-100&&yy<=col1+100));
 		boolean top2=((xx>=row2-100&&xx<=row2+100)&&(yy>=col1-100&&yy<=col1+100));
 		boolean top3=((xx>=row3-100&&xx<=row3+100)&&(yy>=col1-100&&yy<=col1+100));
@@ -347,6 +324,21 @@ public class ClothingScene extends JPanel implements MouseListener,MouseMotionLi
 		}
 			
 		repaint();
+	}
+
+	@Override
+	public void run() {
+		try{
+			while(!mouseEventThread.isInterrupted()){
+				mouseClickEvent();
+				mouseMoveEvent();
+				
+				mouseEventThread.sleep(17);
+			}
+		}catch(InterruptedException ex){	
+		} finally {
+			System.out.println("mouseEvent Thread dead");
+		}
 	}
 	
 }

@@ -15,6 +15,7 @@ public class SoundPlayer implements Runnable{
 		filePath = inputFilePath;
 		playThread = new Thread(this);
 		playThread.start();
+		//System.out.println("asd");
 	}
 	
 	public void stop()
